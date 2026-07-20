@@ -2,7 +2,7 @@
 pragma solidity 0.8.24;
 
 import {IDayWithdrawalVerifier} from "./IDayWithdrawalTransport.sol";
-import {IDaySwapAdapter} from "./DayUniswapV3SwapAdapter.sol";
+import {IDaySwapAdapter} from "./IDaySwapAdapter.sol";
 import {DayOriginBoundPosition, DayOriginBoundPositionFactory} from "./DayOriginBoundPosition.sol";
 
 interface IERC20DayExecutor {

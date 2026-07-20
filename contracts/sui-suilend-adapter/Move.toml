@@ -1,8 +1,0 @@
-[package]
-name = "day_suilend_adapter"
-edition = "2024"
-
-[dependencies]
-day = { local = "../sui" }
-suilend = { git = "https://github.com/suilend/suilend.git", subdir = "contracts/suilend", rev = "d5ba83a617bb0778b48b0c3b1e77a87be81258ca" }
-usdc = { git = "https://github.com/circlefin/stablecoin-sui.git", subdir = "packages/usdc", rev = "23fff2ed82a7fdc26e408a56553b1e1d0ba7b06f" }
