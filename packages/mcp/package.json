@@ -1,0 +1,49 @@
+{
+  "name": "@dayprotocol/mcp",
+  "version": "0.1.0",
+  "description": "DAY GUIDE MCP server — Streamable HTTP tools mirroring agents/skills.mjs (hosted-only, not an npm install)",
+  "type": "module",
+  "private": true,
+  "main": "./src/index.mjs",
+  "exports": {
+    ".": {
+      "import": "./src/index.mjs",
+      "default": "./src/index.mjs"
+    },
+    "./tools": {
+      "import": "./src/tools.mjs",
+      "default": "./src/tools.mjs"
+    }
+  },
+  "bin": {
+    "day-mcp": "./src/cli.mjs"
+  },
+  "files": [
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "start": "node src/cli.mjs",
+    "test": "node --test tests/**/*.test.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "keywords": [
+    "day",
+    "dayprotocol",
+    "mcp",
+    "model-context-protocol",
+    "streamable-http",
+    "agents"
+  ],
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dayprotocol/day.git",
+    "directory": "packages/mcp"
+  },
+  "homepage": "https://dayprotocol.com",
+  "author": "Limitless Labs Inc"
+}

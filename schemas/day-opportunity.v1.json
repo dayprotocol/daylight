@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-opportunity.v1.json",
+  "title": "day-opportunity.v1",
+  "type": "object",
+  "required": ["schemaVersion", "status", "minTvlUsd", "opportunities"],
+  "properties": {
+    "schemaVersion": { "const": "day-opportunity.v1" },
+    "status": { "type": "string" },
+    "minTvlUsd": { "type": "number" },
+    "opportunities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "schemaVersion",
+          "status",
+          "poolId",
+          "project",
+          "chain",
+          "executable",
+          "autoStake"
+        ],
+        "properties": {
+          "schemaVersion": { "const": "day-opportunity.v1" },
+          "status": { "type": "string" },
+          "event": { "type": "string" },
+          "poolId": { "type": "string" },
+          "project": { "type": "string" },
+          "chain": { "type": "string" },
+          "symbol": { "type": "string" },
+          "tvlUsd": { "type": "number" },
+          "apy": { "type": ["number", "null"] },
+          "executable": { "type": "boolean" },
+          "autoStake": { "type": "boolean", "const": false }
+        }
+      }
+    },
+    "snapshot": { "type": "object" },
+    "blockers": { "type": "array", "items": { "type": "string" } },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

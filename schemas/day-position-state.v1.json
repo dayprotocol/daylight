@@ -1,0 +1,49 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-position-state.v1.json",
+  "title": "day-position-state.v1",
+  "description": "Cage get_state PositionState. Wallet-only identity; no character/account.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "walletAddress",
+    "positionId",
+    "liquidMicros",
+    "stakedMicros",
+    "policy",
+    "capability",
+    "actions",
+    "destinationLocked"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "day-position-state.v1" },
+    "walletAddress": { "type": "string" },
+    "positionId": { "type": ["string", "null"] },
+    "chain": { "type": "string" },
+    "liquidMicros": { "type": "string", "pattern": "^\\d+$" },
+    "stakedMicros": { "type": "string", "pattern": "^\\d+$" },
+    "byChain": { "type": "object" },
+    "byVenue": { "type": "object" },
+    "policy": { "type": "object" },
+    "capability": { "type": "object" },
+    "actions": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["ROUTE", "EXIT", "REBALANCE", "HARVEST", "COMPOUND", "AUTOPAY"]
+      }
+    },
+    "destinationLocked": { "const": true },
+    "agentMayWithdrawPrincipal": { "const": false },
+    "ownerMustSign": { "const": true },
+    "dayHoldsKeys": { "const": false },
+    "honesty": {
+      "type": "object",
+      "properties": {
+        "mode": { "type": "string" },
+        "onChain": { "type": "boolean" },
+        "notes": { "type": "array", "items": { "type": "string" } }
+      }
+    }
+  }
+}

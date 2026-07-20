@@ -1,0 +1,11 @@
+[package]
+name = "DAYHubOApp"
+edition = "2024.beta"
+version = "0.1.0"
+
+[dependencies]
+DAY = { local = "../sui" }
+OApp = { git = "https://github.com/LayerZero-Labs/LayerZero-v2.git", subdir = "packages/layerzero-v2/sui/contracts/oapps/oapp", rev = "9c741e7f9790639537b1710a203bcdfd73b0b9ac" }
+
+[addresses]
+day_hub_oapp = "0x0"

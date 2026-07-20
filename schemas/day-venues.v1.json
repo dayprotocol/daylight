@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-venues.v1.json",
+  "title": "day-venues.v1",
+  "type": "object",
+  "required": ["schemaVersion", "phase", "launchHomes", "venues"],
+  "properties": {
+    "schemaVersion": { "const": "day-venues.v1" },
+    "phase": { "type": "integer" },
+    "launchHomes": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "execution_enabled": { "type": "boolean" },
+    "broadcast_enabled": { "type": "boolean" },
+    "executionEnabled": { "type": "boolean", "description": "OPEN_YIELD_EXECUTION_ENABLED — owner-sign prepare path" },
+    "broadcastEnabled": { "type": "boolean", "description": "OPEN_YIELD_ALLOW_BROADCAST — server submit kill switch (default off)" },
+    "executionMode": {
+      "type": "string",
+      "enum": ["disabled", "owner_sign_prepare", "broadcast"],
+      "description": "DAY-267: disabled | owner_sign_prepare (exec on, bc off) | broadcast (both on; still non-custodial unless real digest)"
+    },
+    "venues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["venueId", "chain", "ready"],
+        "properties": {
+          "venueId": { "type": "string" },
+          "formId": { "type": "string" },
+          "chain": { "type": "string" },
+          "ready": { "type": "boolean" },
+          "writeReady": { "type": "boolean" },
+          "readiness": { "type": "string" },
+          "wave": { "type": "string" },
+          "priority": { "type": "number" },
+          "phase1": { "type": "boolean" },
+          "gross_apy_bps": { "type": ["number", "null"] },
+          "actions": { "type": "array", "items": { "type": "string" } },
+          "reason": { "type": ["string", "null"] },
+          "role": { "type": ["string", "null"] },
+          "asset": { "type": ["string", "null"] },
+          "kind": { "type": ["string", "null"] },
+          "source": { "type": ["string", "null"] },
+          "ticket": { "type": ["string", "null"] },
+          "liveYieldReader": {
+            "type": "string",
+            "enum": ["configured", "unavailable"]
+          }
+        }
+      }
+    },
+    "forms": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["formId", "venueId", "chain", "ready"],
+        "properties": {
+          "formId": { "type": "string" },
+          "venueId": { "type": "string" },
+          "chain": { "type": "string" },
+          "ready": { "type": "boolean" },
+          "readiness": { "type": "string" },
+          "wave": { "type": "string" },
+          "priority": { "type": "number" },
+          "actions": { "type": "array", "items": { "type": "string" } }
+        }
+      }
+    },
+    "formCount": { "type": "integer" },
+    "day1": { "type": "array", "items": { "type": "string" } },
+    "day2": { "type": "array", "items": { "type": "string" } },
+    "byChain": { "type": "object" }
+  }
+}

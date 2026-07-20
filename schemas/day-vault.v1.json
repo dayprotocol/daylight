@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dayprotocol.com/schemas/day-vault.v1.json",
+  "title": "day-vault.v1",
+  "description": "DAY vault config, vault state, and owner position/shares. Money fields are micros (USDC 6dp) as decimal-integer strings. Fee applies to harvested yield only.",
+  "type": "object",
+  "required": ["schemaVersion"],
+  "properties": {
+    "schemaVersion": { "const": "day-vault.v1" },
+    "config": { "$ref": "#/$defs/VaultConfig" },
+    "vault": { "$ref": "#/$defs/Vault" },
+    "position": { "$ref": "#/$defs/Position" },
+    "positions": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/Position" }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "micros": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Non-negative integer micros as string (BigInt-safe)"
+    },
+    "VaultConfig": {
+      "type": "object",
+      "required": [
+        "id",
+        "name",
+        "asset",
+        "feeSkimBps",
+        "autoDeployDefaultOff",
+        "paused"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "asset": {
+          "type": "string",
+          "description": "Asset symbol or type tag, e.g. USDC"
+        },
+        "feeSkimBps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Performance skim on harvested yield only; default 500"
+        },
+        "autoDeployDefaultOff": {
+          "type": "boolean",
+          "const": true,
+          "description": "Strategy/Auto Yield deploy is OFF by default"
+        },
+        "strategyEnabled": {
+          "type": "boolean",
+          "default": false,
+          "description": "Owner arm for liquid→Form deploy; default false"
+        },
+        "allowedForms": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Form ids / venue bindings"
+        },
+        "maxTvlMicros": {
+          "anyOf": [{ "$ref": "#/$defs/micros" }, { "type": "null" }]
+        },
+        "paused": { "type": "boolean" },
+        "depositFeeBps": {
+          "type": "integer",
+          "const": 0,
+          "description": "Always 0 — fee only on yield"
+        },
+        "withdrawFeeBps": {
+          "type": "integer",
+          "const": 0,
+          "description": "Always 0 — fee only on yield"
+        }
+      },
+      "additionalProperties": true
+    },
+    "Vault": {
+      "type": "object",
+      "required": [
+        "id",
+        "configId",
+        "totalAssetsMicros",
+        "totalShares",
+        "liquidMicros"
+      ],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "configId": { "type": "string", "minLength": 1 },
+        "totalAssetsMicros": {
+          "$ref": "#/$defs/micros",
+          "description": "NAV = liquid + deployed"
+        },
+        "totalShares": {
+          "$ref": "#/$defs/micros",
+          "description": "Outstanding share units (integer string)"
+        },
+        "liquidMicros": {
+          "$ref": "#/$defs/micros",
+          "description": "Assets not yet deployed to Forms/venues"
+        },
+        "deployedMicros": {
+          "$ref": "#/$defs/micros",
+          "description": "Sum of deployed_by_form"
+        },
+        "deployedByForm": {
+          "type": "object",
+          "additionalProperties": { "$ref": "#/$defs/micros" },
+          "description": "form_id → amount micros"
+        },
+        "pricePerShare": {
+          "type": ["string", "null"],
+          "description": "Assets per share in fixed-point micros; null if empty"
+        }
+      },
+      "additionalProperties": true
+    },
+    "Position": {
+      "type": "object",
+      "required": ["vaultId", "owner", "shares"],
+      "properties": {
+        "id": { "type": "string" },
+        "vaultId": { "type": "string", "minLength": 1 },
+        "owner": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Owner address or account id (not team custody)"
+        },
+        "shares": {
+          "$ref": "#/$defs/micros",
+          "description": "Share claim on vault NAV"
+        },
+        "assetsMicros": {
+          "anyOf": [{ "$ref": "#/$defs/micros" }, { "type": "null" }],
+          "description": "Optional cached NAV of shares"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

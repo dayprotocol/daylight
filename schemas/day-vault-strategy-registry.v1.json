@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dayprotocol.com/schemas/day-vault-strategy-registry.v1.json",
+  "title": "day-vault-strategy-registry.v1",
+  "description": "DAY curated vault LIST allowlist (DAY-352/359/356). Separate from map-only managed-vaults INDEX. depositableLive must stay false without write path + WRITE_GO.",
+  "type": "object",
+  "required": ["schemaVersion", "entries"],
+  "properties": {
+    "schemaVersion": { "const": "day-vault-strategy-registry.v1" },
+    "description": { "type": "string" },
+    "entries": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/RegistryEntry" }
+    }
+  },
+  "additionalProperties": true,
+  "$defs": {
+    "RegistryEntry": {
+      "type": "object",
+      "required": ["platform", "chain", "vaultRef", "status"],
+      "properties": {
+        "strategyId": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Stable public id; default vault-{platform}-{chain}-{vaultRef}"
+        },
+        "platform": {
+          "type": "string",
+          "enum": [
+            "morpho",
+            "kamino",
+            "yearn",
+            "drift",
+            "pendle",
+            "hyperliquid",
+            "sanctum",
+            "haedal",
+            "kai"
+          ]
+        },
+        "chain": { "type": "string", "minLength": 1 },
+        "vaultRef": {
+          "type": "string",
+          "minLength": 1,
+          "description": "Platform-native vault address / market id"
+        },
+        "vaultId": { "type": "string" },
+        "name": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["candidate", "approved", "rejected", "paused"]
+        },
+        "curatorName": { "type": ["string", "null"] },
+        "curatorAddress": { "type": ["string", "null"] },
+        "curator": {
+          "type": "object",
+          "properties": {
+            "name": { "type": ["string", "null"] },
+            "address": { "type": ["string", "null"] }
+          },
+          "additionalProperties": true
+        },
+        "performanceFeeBps": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Venue curator/strategist performance fee; null = unknown (never invent 0%)"
+        },
+        "managementFeeBps": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 10000
+        },
+        "daySkimBps": {
+          "type": "integer",
+          "const": 0,
+          "description": "DAY yield skim on harvested yield only (locked 0 bps (flat skim superseded FeeConfig v2))"
+        },
+        "riskClass": {
+          "type": "string",
+          "enum": ["stable", "blue_chip", "lst", "other"]
+        },
+        "adapterId": { "type": "string" },
+        "readiness": { "type": "string" },
+        "depositableLive": {
+          "type": "boolean",
+          "const": false,
+          "description": "Scaffold: always false until write ticket + WRITE_GO"
+        },
+        "tvlUsd": { "type": ["number", "null"] },
+        "ageDays": { "type": ["number", "null"] },
+        "apy": {
+          "type": ["number", "null"],
+          "description": "Honest null when unknown — never invent"
+        },
+        "url": { "type": ["string", "null"] },
+        "asset": { "type": ["string", "null"] },
+        "notes": { "type": "array", "items": { "type": "string" } },
+        "ticket": { "type": ["string", "null"] }
+      },
+      "additionalProperties": true
+    }
+  }
+}
