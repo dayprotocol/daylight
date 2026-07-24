@@ -1,0 +1,213 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-execution-family-evidence.v1.json",
+  "title": "day-execution-family-evidence.v1",
+  "description": "DAY-983 immutable ExecutionFamily production evidence record. Never authorizes depositableLive promotion.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "familyId",
+    "anchorDayopId",
+    "chain",
+    "depositor",
+    "mode",
+    "roundTripProof",
+    "promotesDepositableLive"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "day-execution-family-evidence.v1"
+    },
+    "builtAt": {
+      "type": ["string", "null"],
+      "description": "ISO-8601 build time when known."
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["offline-fixture", "plan-only", "armed-measure"]
+    },
+    "familyId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "anchorDayopId": {
+      "type": "string",
+      "pattern": "^dayop[a-z0-9]+$"
+    },
+    "chain": {
+      "type": "string",
+      "minLength": 1
+    },
+    "depositor": {
+      "type": "string",
+      "minLength": 1
+    },
+    "amount": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "unit": { "type": "string" },
+        "value": { "type": "string" }
+      }
+    },
+    "identity": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "catalogFound": { "type": "boolean" },
+        "planStrategyId": { "type": ["string", "null"] },
+        "planOpportunityId": { "type": ["string", "null"] },
+        "planChain": { "type": ["string", "null"] },
+        "planAdapterId": { "type": ["string", "null"] },
+        "checks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["code", "ok"],
+            "properties": {
+              "code": { "type": "string" },
+              "ok": { "type": "boolean" },
+              "detail": { "type": ["string", "null"] }
+            }
+          }
+        },
+        "ok": { "type": "boolean" }
+      }
+    },
+    "deposit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "planStatus": { "type": ["string", "null"] },
+        "txHashes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "receipts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/receiptProof" }
+        },
+        "position": {
+          "type": ["object", "null"],
+          "additionalProperties": true
+        }
+      }
+    },
+    "exit": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "planStatus": { "type": ["string", "null"] },
+        "txHashes": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "receipts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/receiptProof" }
+        },
+        "exactDepositorReturn": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "ok": { "type": "boolean" },
+            "receiver": { "type": ["string", "null"] },
+            "expectedDepositor": { "type": ["string", "null"] },
+            "assetDelta": { "type": ["string", "null"] },
+            "dustTolerance": { "type": ["string", "null"] },
+            "reasons": {
+              "type": "array",
+              "items": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "roundTripProof": {
+      "$ref": "#/$defs/roundTripProof"
+    },
+    "compatibleSiblingPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "predicate": {
+          "type": "string",
+          "const": "day-986-assertCompatibleSibling"
+        },
+        "compatibleDayopIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "residualDayopIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "siblingChecks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "candidateDayopId": { "type": "string" },
+              "compatible": { "type": "boolean" },
+              "reasons": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "evidenceHash": {
+      "type": ["string", "null"],
+      "description": "sha256 hex of canonical measured preimage when status=measured."
+    },
+    "preimage": {
+      "type": ["string", "null"]
+    },
+    "promotesDepositableLive": {
+      "const": false,
+      "description": "DAY-983 never promotes live."
+    },
+    "notes": {
+      "type": ["string", "null"]
+    },
+    "residualCodes": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "$defs": {
+    "roundTripProof": {
+      "type": "object",
+      "required": ["status"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["none", "simulation", "measured"]
+        },
+        "evidenceRef": { "type": ["string", "null"] }
+      }
+    },
+    "receiptProof": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "hash": { "type": "string" },
+        "ok": { "type": "boolean" },
+        "status": { "type": ["string", "null"] },
+        "from": { "type": ["string", "null"] },
+        "blockNumber": { "type": ["string", "number", "null"] },
+        "finality": { "type": ["string", "null"] },
+        "reasons": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  }
+}

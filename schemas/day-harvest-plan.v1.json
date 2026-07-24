@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-harvest-plan.v1.json",
+  "title": "day-harvest-plan.v1",
+  "type": "object",
+  "required": ["schemaVersion", "mode", "feeBps"],
+  "properties": {
+    "schemaVersion": { "const": "day-harvest-plan.v1" },
+    "mode": { "type": "string" },
+    "grossYieldMicros": { "type": "string" },
+    "protocolFeeMicros": { "type": "string" },
+    "netYieldMicros": { "type": "string" },
+    "feeBps": { "type": "integer" },
+    "commands": { "type": "array" },
+    "blockers": { "type": "array" }
+  }
+}

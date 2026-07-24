@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dayprotocol.com/schemas/day-strategy-guardrails.v1.json",
+  "title": "day-strategy-guardrails.v1",
+  "description": "DAY-428 Guardrails for a permissionless Strategy (Strategy Lead allocation policy). Fail-closed: assets + Yield Opportunity allowlist + max allocation required; custody none; owner exit always; depositableLive/onChainFactory false until live factory epic. Product language: Strategy / Strategy Lead / Guardrails / Yield Opportunity — not DAY vault product.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "assetAllowlist",
+    "opportunityAllowlist",
+    "maxAllocationBps",
+    "ownerExitAlways",
+    "agentMayWithdrawPrincipal",
+    "custody",
+    "depositableLive",
+    "onChainFactory"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "day-strategy-guardrails.v1"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Optional human label for the Strategy Guardrails set"
+    },
+    "assetAllowlist": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64,
+        "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$"
+      },
+      "uniqueItems": true,
+      "description": "Deposit assets allowed (e.g. USDC, SOL). Non-empty required."
+    },
+    "opportunityAllowlist": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,255}$"
+      },
+      "uniqueItems": true,
+      "description": "Yield Opportunity ids this Strategy may allocate into (leaf venues/adapters). Non-empty required."
+    },
+    "maxAllocationBps": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 10000,
+      "description": "Max share of Strategy AUM into any single Yield Opportunity (1..10000 bps). 10000 = 100%."
+    },
+    "maxAllocationMicros": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        { "type": "null" }
+      ],
+      "description": "Optional absolute cap on Strategy AUM (micros string). null = unset."
+    },
+    "maxPerOpportunityMicros": {
+      "anyOf": [
+        {
+          "type": "string",
+          "pattern": "^[0-9]+$"
+        },
+        { "type": "null" }
+      ],
+      "description": "Optional absolute cap per Yield Opportunity (micros string)."
+    },
+    "homeChain": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 32,
+      "description": "Primary chain for the Strategy (sui|solana|base|arbitrum|…)"
+    },
+    "allowedChains": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1, "maxLength": 32 },
+      "uniqueItems": true
+    },
+    "ownerExitAlways": {
+      "const": true,
+      "description": "Constitution: owner can always EXIT principal"
+    },
+    "agentMayWithdrawPrincipal": {
+      "const": false,
+      "description": "Agents / Strategy Lead automation cannot redeem principal"
+    },
+    "custody": {
+      "const": "none",
+      "description": "No team / server intermediate custody of principal"
+    },
+    "depositableLive": {
+      "const": false,
+      "description": "Scaffold fail-closed: never true without write path + WRITE_GO + on-chain Strategy factory"
+    },
+    "onChainFactory": {
+      "const": false,
+      "description": "No on-chain Strategy factory contract in DAY-426/427/428 prepare-only scaffold"
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "maxLength": 1024
+    }
+  }
+}

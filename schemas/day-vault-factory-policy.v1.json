@@ -1,0 +1,179 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dayprotocol.com/schemas/day-vault-factory-policy.v1.json",
+  "title": "day-vault-factory-policy.v1",
+  "description": "DAY-386 vault factory policy: permissionless creator rules on top of DAY strategies. Fail-closed: no custody, owner exit always, DAY 5% skim disclosed, depositableLive false without write gates. Principal never charged.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "strategyMode",
+    "strategyAllowlist",
+    "fees",
+    "ownerExitAlways",
+    "agentMayWithdrawPrincipal",
+    "custody",
+    "depositableLive"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "day-vault-factory-policy.v1"
+    },
+    "name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 128,
+      "description": "Optional human label for the vault policy"
+    },
+    "strategyMode": {
+      "type": "string",
+      "enum": ["allowlist", "any_day_strategy"],
+      "description": "allowlist = explicit strategyIds only; any_day_strategy = any registered DAY strategy"
+    },
+    "strategyAllowlist": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 256,
+        "pattern": "^[a-z0-9][a-z0-9_.\\-]{0,255}$"
+      },
+      "uniqueItems": true,
+      "description": "DAY strategyIds this vault may allocate into. Non-empty required when strategyMode=allowlist; may be empty when any_day_strategy"
+    },
+    "rebalance": {
+      "$ref": "#/$defs/RebalanceRules"
+    },
+    "chainScope": {
+      "type": "string",
+      "enum": ["within_chain", "multi_chain"],
+      "default": "within_chain",
+      "description": "within_chain only until multi-chain bridge rails + safety proven for factory vaults"
+    },
+    "homeChain": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Primary chain for the vault (sui|solana|base|arbitrum|…)"
+    },
+    "allowedChains": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "assetAllowlist": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 64
+      },
+      "uniqueItems": true,
+      "description": "Deposit assets allowed (e.g. USDC). Empty = unset (factory may default)"
+    },
+    "caps": {
+      "$ref": "#/$defs/Caps"
+    },
+    "fees": {
+      "$ref": "#/$defs/Fees"
+    },
+    "ownerExitAlways": {
+      "const": true,
+      "description": "Constitution: owner can always EXIT principal"
+    },
+    "agentMayWithdrawPrincipal": {
+      "const": false,
+      "description": "Agents cannot redeem principal"
+    },
+    "custody": {
+      "const": "none",
+      "description": "No team / server intermediate custody of principal"
+    },
+    "depositableLive": {
+      "const": false,
+      "description": "Scaffold fail-closed: never true without write path + WRITE_GO gates (later tickets)"
+    },
+    "autoHarvest": {
+      "type": "boolean",
+      "default": false,
+      "description": "Permissionless harvest arm — OFF by default"
+    },
+    "autoCompound": {
+      "type": "boolean",
+      "default": false,
+      "description": "Compound residual after skim — OFF by default"
+    },
+    "autoPayEnabled": {
+      "type": "boolean",
+      "default": false,
+      "description": "Auto Pay residual hooks — OFF by default; owner-gated"
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "maxLength": 1024
+    }
+  },
+  "$defs": {
+    "micros": {
+      "type": "string",
+      "pattern": "^[0-9]+$",
+      "description": "Non-negative integer micros as decimal string (BigInt-safe)"
+    },
+    "RebalanceRules": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean", "default": false },
+        "cadence": {
+          "type": ["string", "null"],
+          "enum": ["manual", "hourly", "daily", "weekly", "monthly", null]
+        },
+        "minApyImprovementBps": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "maximum": 10000,
+          "description": "Only switch strategy if net APY improves by at least this many bps"
+        }
+      }
+    },
+    "Caps": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "maxTvlMicros": {
+          "anyOf": [{ "$ref": "#/$defs/micros" }, { "type": "null" }]
+        },
+        "maxPerStrategyMicros": {
+          "anyOf": [{ "$ref": "#/$defs/micros" }, { "type": "null" }]
+        },
+        "maxDepositMicros": {
+          "anyOf": [{ "$ref": "#/$defs/micros" }, { "type": "null" }]
+        }
+      }
+    },
+    "Fees": {
+      "type": "object",
+      "required": ["daySkimBps", "creatorFeeBps", "depositFeeBps", "withdrawFeeBps"],
+      "additionalProperties": false,
+      "properties": {
+        "daySkimBps": {
+          "const": 0,
+          "description": "DAY yield performance skim on harvested yield only (5%)"
+        },
+        "creatorFeeBps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2500,
+          "description": "Optional Strategy Lead performance fee on realized profit; principal never charged; max 2500 bps (25% FeeConfig cap)"
+        },
+        "depositFeeBps": {
+          "const": 0,
+          "description": "Always 0 — fee only on yield"
+        },
+        "withdrawFeeBps": {
+          "const": 0,
+          "description": "Always 0 — fee only on yield"
+        }
+      }
+    }
+  }
+}

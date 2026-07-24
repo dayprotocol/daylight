@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-capability.v1.json",
+  "title": "day-capability.v1",
+  "type": "object",
+  "required": ["schemaVersion", "walletAddress", "granted", "scopes"],
+  "properties": {
+    "schemaVersion": { "const": "day-capability.v1" },
+    "walletAddress": { "type": "string" },
+    "granted": { "type": "boolean" },
+    "scopes": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["route", "exit", "rebalance", "harvest", "compound", "autopay"]
+      }
+    },
+    "grantee": { "type": ["string", "null"] },
+    "strategyId": { "type": ["string", "null"] },
+    "managedAutopilot": { "type": "boolean" },
+    "scope": { "type": ["object", "null"] },
+    "scopeHash": { "type": ["string", "null"] },
+    "guardrailsHash": { "type": ["string", "null"] },
+    "custody": { "type": "boolean" },
+    "agentMayWithdrawPrincipal": { "type": "boolean" }
+  }
+}

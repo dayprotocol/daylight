@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-map-venues.v1.json",
+  "title": "day-map-venues.v1",
+  "description": "DefiLlama ≥$10M venue map — discovery only, NOT execution truth. Adapter read_apy is required before deposits.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "updatedAt",
+    "minTvlUsd",
+    "chains",
+    "source",
+    "venues",
+    "venueCount",
+    "poolCount"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "day-map-venues.v1" },
+    "updatedAt": { "type": "string" },
+    "minTvlUsd": { "type": "number", "minimum": 0 },
+    "chains": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "source": { "type": "string" },
+    "disclaimer": { "type": "string" },
+    "mapOnly": { "type": "boolean" },
+    "notExecutionTruth": { "type": "boolean" },
+    "sources": {
+      "type": "object",
+      "properties": {
+        "defillama": {
+          "type": "object",
+          "properties": {
+            "status": { "type": "string" },
+            "fetchedAt": { "type": ["string", "null"] },
+            "poolCount": { "type": "integer" },
+            "mapPoolCount": { "type": "integer" }
+          }
+        }
+      }
+    },
+    "venues": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["project", "chain", "poolCount", "maxTvl", "samplePoolIds"],
+        "properties": {
+          "project": { "type": "string" },
+          "chain": { "type": "string" },
+          "poolCount": { "type": "integer", "minimum": 0 },
+          "maxTvl": { "type": "number", "minimum": 0 },
+          "samplePoolIds": {
+            "type": "array",
+            "items": { "type": "string" }
+          },
+          "tvlSum": { "type": "number" }
+        }
+      }
+    },
+    "venueCount": { "type": "integer", "minimum": 0 },
+    "poolCount": { "type": "integer", "minimum": 0 },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

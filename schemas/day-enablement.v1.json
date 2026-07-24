@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-enablement.v1.json",
+  "title": "day-enablement.v1",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "phase",
+    "goNoGo",
+    "stakeDefault",
+    "protocolYieldSkimBps",
+    "flags",
+    "blockers"
+  ],
+  "properties": {
+    "schemaVersion": { "const": "day-enablement.v1" },
+    "phase": { "type": "integer" },
+    "goNoGo": { "type": "string" },
+    "stakeDefault": { "type": "string", "const": "off" },
+    "protocolYieldSkimBps": { "type": "integer", "const": 500 },
+    "executionEnabled": { "type": "boolean" },
+    "broadcastEnabled": { "type": "boolean" },
+    "executionMode": {
+      "type": "string",
+      "enum": ["disabled", "owner_sign_prepare", "broadcast"]
+    },
+    "flags": {
+      "type": "object",
+      "required": [
+        "OPEN_YIELD_EXECUTION_ENABLED",
+        "OPEN_YIELD_ALLOW_BROADCAST",
+        "kill_switch_env"
+      ],
+      "properties": {
+        "OPEN_YIELD_EXECUTION_ENABLED": { "type": "boolean" },
+        "OPEN_YIELD_ALLOW_BROADCAST": { "type": "boolean" },
+        "kill_switch_env": { "type": "string" },
+        "kill_switch_safe": { "type": "boolean" },
+        "executionMode": {
+          "type": "string",
+          "enum": ["disabled", "owner_sign_prepare", "broadcast"]
+        }
+      }
+    },
+    "sdk": { "type": "object" },
+    "venues": { "type": "array" },
+    "phase1": { "type": "object" },
+    "blockers": { "type": "array", "items": { "type": "string" } },
+    "checklist": { "type": "array" },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  }
+}

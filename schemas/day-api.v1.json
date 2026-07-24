@@ -1,0 +1,111 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "day-api.v1",
+  "title": "DAY canonical API request shapes",
+  "description": "Canonical route + request-body contracts for the Auto Yield product surface. All money fields are micros (USDC 6dp) as BigInt-safe decimal-integer strings. Fee bps is server/policy-owned and is NOT part of any request body.",
+  "x-routes": {
+    "canonicalPrefix": "/api/characters/{characterId}/day",
+    "globalPrefix": "/api/day",
+    "policyPrefix": "/api/characters/{characterId}/auto-yield",
+    "aliasNote": "DAY-280/DAY-290: money surface is /day/* (position, funding, preview, route, harvest, withdraw, auto-pay, rebalance). Policy GET/PUT remains under /auto-yield. Venues live at /api/day/venues (alias /api/auto-yield/venues). Paths use {characterId} in this schema; live routes-manifest uses {id} — same segment.",
+    "auth": "X-API-Key (owner|agent|keeper). X-Role ignored.",
+    "openapi": "/openapi.json",
+    "endpoints": {
+      "listVenues": { "method": "GET", "path": "/api/day/venues", "auth": "public" },
+      "listStrategies": { "method": "GET", "path": "/api/day/strategies", "auth": "public" },
+      "listOpportunities": { "method": "GET", "path": "/api/day/opportunities", "auth": "public" },
+      "getPosition": { "method": "GET", "path": "/api/characters/{characterId}/day/position", "auth": "owner_or_agent" },
+      "getFunding": { "method": "GET", "path": "/api/characters/{characterId}/day/funding", "auth": "owner_or_agent" },
+      "getAutoYield": { "method": "GET", "path": "/api/characters/{characterId}/auto-yield", "auth": "owner_or_agent" },
+      "setAutoYield": { "method": "PUT", "path": "/api/characters/{characterId}/auto-yield", "auth": "owner" },
+      "previewRoute": { "method": "POST", "path": "/api/characters/{characterId}/day/preview", "auth": "owner_or_agent" },
+      "routeYield": { "method": "POST", "path": "/api/characters/{characterId}/day/route", "auth": "owner" },
+      "harvest": { "method": "POST", "path": "/api/characters/{characterId}/day/harvest", "auth": "permissionless" },
+      "withdraw": { "method": "POST", "path": "/api/characters/{characterId}/day/withdraw", "auth": "owner" },
+      "enableAutoPay": { "method": "POST", "path": "/api/characters/{characterId}/day/auto-pay", "auth": "owner" },
+      "rebalance": { "method": "POST", "path": "/api/characters/{characterId}/day/rebalance", "auth": "owner" },
+      "depositPlan": { "method": "POST", "path": "/api/day/strategies/deposit/plan", "auth": "public" },
+      "withdrawPlan": { "method": "POST", "path": "/api/day/strategies/withdraw/plan", "auth": "public" },
+      "bridgePlan": { "method": "POST", "path": "/api/day/bridge/plan", "auth": "public" },
+      "bridgeDelivery": { "method": "POST", "path": "/api/day/bridge/delivery", "auth": "owner_or_keeper" },
+      "bridgeRescue": { "method": "POST", "path": "/api/day/bridge/rescue", "auth": "owner" }
+    }
+  },
+  "$defs": {
+    "microsString": {
+      "type": "string",
+      "pattern": "^\\d+$",
+      "description": "BigInt-safe, non-negative decimal integer of micros. No floats, no exponent, no units."
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "pattern": "^oy_[a-z][a-z0-9-]*_[^_]+_.+$",
+      "maxLength": 255,
+      "description": "Canonical idempotency key shape oy_<op>_<characterId>_<nonce>, sent as the Idempotency-Key header on mutating money calls."
+    },
+    "autoPayConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "percentage": { "type": "integer", "minimum": 0, "maximum": 100 },
+        "targets": { "type": "array", "items": { "type": "string" } },
+        "frequency": { "type": "string" }
+      },
+      "required": ["enabled"]
+    },
+    "routeRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amountMicros", "token", "goal"],
+      "properties": {
+        "amountMicros": { "$ref": "#/$defs/microsString" },
+        "token": { "type": "string", "enum": ["USDC"] },
+        "goal": { "type": "string" },
+        "riskTolerance": { "type": "string", "enum": ["low", "medium", "high"] },
+        "preferredChains": { "type": "array", "items": { "type": "string" } },
+        "autoBridge": { "type": "boolean" },
+        "autoCompound": { "type": "boolean" },
+        "stake": { "type": "boolean" },
+        "autoPayConfig": { "$ref": "#/$defs/autoPayConfig" }
+      },
+      "description": "Body for previewRoute (never broadcasts) and routeYield. NOTE: no feeBps here — fee is server/policy-owned."
+    },
+    "harvestRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "compound": { "type": "boolean" },
+        "execute": { "type": "boolean" }
+      },
+      "description": "Permissionless poke. Caller cannot choose waterfall behavior: payPercentage/feeBps/waterfall/amount are NOT accepted."
+    },
+    "withdrawRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["amountMicros"],
+      "properties": {
+        "amountMicros": { "$ref": "#/$defs/microsString" },
+        "token": { "type": "string", "enum": ["USDC"] },
+        "unstakeFirst": { "type": "boolean" }
+      },
+      "description": "Owner-only. No protocol fee on withdraw."
+    },
+    "autoPayRequest": { "$ref": "#/$defs/autoPayConfig" },
+    "autoYieldRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["enabled"],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "targetVenue": { "type": "string" },
+        "maxStakeMicros": {
+          "type": "string",
+          "pattern": "^\\d+$",
+          "description": "BigInt-safe micros; 0 allowed to reset the stake envelope."
+        }
+      },
+      "description": "Owner toggle. Stake OFF by default."
+    }
+  }
+}
