@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-owner-policy.v1.json",
+  "title": "day-owner-policy.v1",
+  "type": "object",
+  "required": ["schemaVersion", "walletAddress", "chain", "enabled", "venueAllowlist", "payeeAllowlist"],
+  "properties": {
+    "schemaVersion": { "const": "day-owner-policy.v1" },
+    "walletAddress": { "type": "string" },
+    "chain": {
+      "type": "string",
+      "enum": ["base", "arbitrum", "sui", "solana"],
+      "description": "Cage home chain (DAY-189 multi-chain OwnerPolicy)"
+    },
+    "enabled": { "type": "boolean" },
+    "venueAllowlist": { "type": "array", "items": { "type": "string" } },
+    "payeeAllowlist": { "type": "array", "items": { "type": "string" } },
+    "ownerDestinationLock": { "const": true },
+    "agentMayWithdrawPrincipal": { "const": false },
+    "protocolYieldSkimBps": { "type": "integer", "minimum": 0, "maximum": 1000 }
+  }
+}

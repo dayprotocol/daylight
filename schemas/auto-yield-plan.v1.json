@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/auto-yield-plan.v1.json",
+  "title": "auto-yield-plan.v1",
+  "type": "object",
+  "required": ["schemaVersion", "mode", "blockers"],
+  "properties": {
+    "schemaVersion": { "const": "auto-yield-plan.v1" },
+    "mode": { "type": "string" },
+    "selected": { "type": ["object", "null"] },
+    "blockers": { "type": "array" },
+    "protocolYieldSkimBps": { "type": "integer", "const": 500 }
+  }
+}

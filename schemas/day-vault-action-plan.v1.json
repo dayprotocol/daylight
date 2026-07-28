@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-vault-action-plan.v1.json",
+  "title": "day-vault-action-plan.v1",
+  "type": "object",
+  "required": ["schemaVersion", "chain", "walletAddress", "kind", "status", "submitted", "ownerMustSign"],
+  "properties": {
+    "schemaVersion": { "const": "day-vault-action-plan.v1" },
+    "chain": {
+      "type": "string",
+      "description": "Cage home chain (base | arbitrum | sui | solana)"
+    },
+    "walletAddress": { "type": "string" },
+    "kind": {
+      "type": "string",
+      "enum": ["ROUTE", "EXIT", "REBALANCE", "HARVEST", "COMPOUND", "AUTOPAY"]
+    },
+    "status": { "type": "string", "enum": ["prepared", "rejected"] },
+    "submitted": { "const": false },
+    "ownerMustSign": { "const": true },
+    "dayHoldsKeys": { "const": false },
+    "liveExecution": { "const": false }
+  }
+}

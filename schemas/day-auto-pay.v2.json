@@ -1,0 +1,102 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "day-auto-pay.v2",
+  "title": "DAY Auto Pay Config v2",
+  "description": "Tier1 self-funding Auto Pay. Tier2 third-party transfer blocked until DAY_AUTOPAY_TIER2_LEGAL_GO=1.",
+  "type": "object",
+  "required": ["schemaVersion", "autoPayEnabled", "tier", "allocation", "trigger", "safety", "fees"],
+  "properties": {
+    "schemaVersion": { "const": "day-auto-pay.v2" },
+    "walletAddress": { "type": ["string", "null"] },
+    "autoPayEnabled": { "type": "boolean" },
+    "enabled": { "type": "boolean", "description": "v1 alias of autoPayEnabled" },
+    "tier": {
+      "type": "string",
+      "enum": ["self_funding", "third_party_transfer"]
+    },
+    "percentage": { "type": "number", "minimum": 0, "maximum": 100 },
+    "targets": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Legacy Tier1 service labels"
+    },
+    "allocation": {
+      "type": "object",
+      "properties": {
+        "percentage": { "type": "number", "minimum": 0, "maximum": 100 },
+        "payees": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["payeeId", "class", "tier"],
+            "properties": {
+              "payeeId": { "type": "string", "pattern": "^[a-z0-9][a-z0-9_.-]{0,63}$" },
+              "class": {
+                "type": "string",
+                "enum": [
+                  "self_storage",
+                  "self_inference",
+                  "self_x402_service",
+                  "self_gas",
+                  "self_compute",
+                  "self_heartbeat",
+                  "self_protocol_ops",
+                  "other_agent_wallet",
+                  "third_party_wallet",
+                  "residual_split"
+                ]
+              },
+              "tier": { "type": "integer", "enum": [1, 2] },
+              "label": { "type": "string" },
+              "weightBps": { "type": ["integer", "null"], "minimum": 0, "maximum": 10000 },
+              "endpoint": { "type": ["string", "null"] },
+              "address": { "type": ["string", "null"] },
+              "intent": { "type": ["string", "null"] }
+            }
+          }
+        }
+      }
+    },
+    "trigger": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["after_harvest", "manual", "scheduled", "threshold", "on_harvest"]
+        },
+        "frequency": { "type": "string" },
+        "minAmountUsd": { "type": ["number", "null"] },
+        "minAmountMicros": { "type": "string", "pattern": "^\\d+$" }
+      }
+    },
+    "safety": {
+      "type": "object",
+      "properties": {
+        "maxPercentagePerHarvest": { "type": "number", "minimum": 0, "maximum": 100 },
+        "payeeAllowlistMandatory": { "const": true },
+        "maxPerPayeePerDayUsd": { "type": ["number", "null"] },
+        "maxPerPayeePerDayMicros": { "type": ["string", "null"] },
+        "emergencyPause": { "type": "boolean" },
+        "dustMicros": { "type": "string", "pattern": "^\\d+$" }
+      }
+    },
+    "fees": {
+      "type": "object",
+      "required": ["performanceFeeBps", "autoPayTransferFeeBps"],
+      "properties": {
+        "performanceFeeBps": { "const": 500 },
+        "autoPayTransferFeeBps": { "const": 0 }
+      }
+    },
+    "legalGate": {
+      "type": "object",
+      "properties": {
+        "tier2": { "type": "string" },
+        "envFlag": { "const": "DAY_AUTOPAY_TIER2_LEGAL_GO" },
+        "open": { "type": "boolean" }
+      }
+    },
+    "frequency": { "type": "string" },
+    "updatedAt": { "type": ["string", "null"] }
+  }
+}

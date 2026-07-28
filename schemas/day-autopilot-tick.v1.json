@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-autopilot-tick.v1.json",
+  "title": "day-autopilot-tick.v1",
+  "type": "object",
+  "required": ["schemaVersion", "tickId", "withinChainOnly", "proposals", "rejects"],
+  "properties": {
+    "schemaVersion": { "const": "day-autopilot-tick.v1" },
+    "tickId": { "type": "string" },
+    "walletAddress": { "type": ["string", "null"] },
+    "positionId": { "type": ["string", "null"] },
+    "chain": { "type": ["string", "null"] },
+    "withinChainOnly": { "const": true },
+    "crossChainRebalance": { "const": false },
+    "bridge": { "type": "null" },
+    "proposals": { "type": "array" },
+    "rejects": { "type": "array" },
+    "events": { "type": "array" },
+    "ownerMustSign": { "type": "boolean" },
+    "submitted": { "type": "boolean" },
+    "liveExecution": { "type": "boolean" }
+  }
+}

@@ -1,0 +1,218 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dayprotocol.com/schemas/day-vault-plan.v1.json",
+  "title": "day-vault-plan.v1",
+  "description": "DAY vault execution plan. Exactly one plan kind per plan (XOR). schemaVersion required. Fail closed on unknown version.",
+  "type": "object",
+  "required": ["schemaVersion", "kind"],
+  "properties": {
+    "schemaVersion": { "const": "day-vault-plan.v1" },
+    "kind": {
+      "type": "string",
+      "enum": [
+        "deposit",
+        "withdraw",
+        "deploy",
+        "undeploy",
+        "harvest",
+        "bridge_in",
+        "swap",
+        "rebalance",
+        "rescue"
+      ],
+      "description": "Exactly one kind per plan — no mixed deposit+withdraw"
+    },
+    "vaultId": { "type": "string" },
+    "owner": { "type": "string" },
+    "idempotencyKey": { "type": "string" },
+    "blockers": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "prepared",
+        "blocked",
+        "executed",
+        "failed",
+        "rescued"
+      ]
+    },
+    "deposit": { "$ref": "#/$defs/DepositBody" },
+    "withdraw": { "$ref": "#/$defs/WithdrawBody" },
+    "deploy": { "$ref": "#/$defs/DeployBody" },
+    "undeploy": { "$ref": "#/$defs/UndeployBody" },
+    "harvest": { "$ref": "#/$defs/HarvestBody" },
+    "bridge_in": { "$ref": "#/$defs/BridgeInBody" },
+    "swap": { "$ref": "#/$defs/SwapBody" },
+    "rebalance": { "$ref": "#/$defs/RebalanceBody" },
+    "rescue": { "$ref": "#/$defs/RescueBody" },
+    "steps": {
+      "type": "array",
+      "items": { "type": "object" },
+      "description": "Optional compose steps; kind remains single top-level action"
+    }
+  },
+  "additionalProperties": true,
+  "allOf": [
+    {
+      "if": { "properties": { "kind": { "const": "deposit" } }, "required": ["kind"] },
+      "then": { "required": ["deposit"] }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "withdraw" } }, "required": ["kind"] },
+      "then": { "required": ["withdraw"] }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "deploy" } }, "required": ["kind"] },
+      "then": { "required": ["deploy"] }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "undeploy" } }, "required": ["kind"] },
+      "then": { "required": ["undeploy"] }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "harvest" } }, "required": ["kind"] },
+      "then": { "required": ["harvest"] }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "bridge_in" } }, "required": ["kind"] },
+      "then": { "required": ["bridge_in"] }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "swap" } }, "required": ["kind"] },
+      "then": { "required": ["swap"] }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "rebalance" } }, "required": ["kind"] },
+      "then": { "required": ["rebalance"] }
+    },
+    {
+      "if": { "properties": { "kind": { "const": "rescue" } }, "required": ["kind"] },
+      "then": { "required": ["rescue"] }
+    }
+  ],
+  "$defs": {
+    "micros": {
+      "type": "string",
+      "pattern": "^[0-9]+$"
+    },
+    "DepositBody": {
+      "type": "object",
+      "required": ["amountMicros"],
+      "properties": {
+        "amountMicros": { "$ref": "#/$defs/micros" },
+        "feeMicros": { "const": "0" },
+        "expectedShares": { "$ref": "#/$defs/micros" }
+      },
+      "additionalProperties": true
+    },
+    "WithdrawBody": {
+      "type": "object",
+      "required": ["shares"],
+      "properties": {
+        "shares": { "$ref": "#/$defs/micros" },
+        "feeMicros": { "const": "0" },
+        "toOwner": { "type": "string" },
+        "expectedAssetsMicros": { "$ref": "#/$defs/micros" }
+      },
+      "additionalProperties": true
+    },
+    "DeployBody": {
+      "type": "object",
+      "required": ["formId", "amountMicros"],
+      "properties": {
+        "formId": { "type": "string" },
+        "amountMicros": { "$ref": "#/$defs/micros" },
+        "requiresStrategyOn": { "type": "boolean", "const": true }
+      },
+      "additionalProperties": true
+    },
+    "UndeployBody": {
+      "type": "object",
+      "required": ["formId", "amountMicros"],
+      "properties": {
+        "formId": { "type": "string" },
+        "amountMicros": { "$ref": "#/$defs/micros" }
+      },
+      "additionalProperties": true
+    },
+    "HarvestBody": {
+      "type": "object",
+      "required": ["grossYieldMicros"],
+      "properties": {
+        "grossYieldMicros": {
+          "$ref": "#/$defs/micros",
+          "description": "Must come from venue claim; never invent"
+        },
+        "feeSkimBps": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10000,
+          "default": 500
+        },
+        "formId": { "type": "string" },
+        "heartbeatBountyMicros": { "$ref": "#/$defs/micros" }
+      },
+      "additionalProperties": true
+    },
+    "BridgeInBody": {
+      "type": "object",
+      "required": ["sourceChain", "destChain", "amountMicros", "minOutMicros"],
+      "properties": {
+        "sourceChain": { "type": "string" },
+        "destChain": { "type": "string", "enum": ["sui", "solana"] },
+        "amountMicros": { "$ref": "#/$defs/micros" },
+        "minOutMicros": { "$ref": "#/$defs/micros" },
+        "rail": { "type": "string", "const": "mayan" },
+        "actualReceivedMicros": { "$ref": "#/$defs/micros" }
+      },
+      "additionalProperties": true
+    },
+    "SwapBody": {
+      "type": "object",
+      "required": ["fromAsset", "toAsset", "amountInMicros", "minOutMicros"],
+      "properties": {
+        "fromAsset": { "type": "string" },
+        "toAsset": { "type": "string" },
+        "amountInMicros": { "$ref": "#/$defs/micros" },
+        "minOutMicros": { "$ref": "#/$defs/micros" },
+        "rail": { "type": "string", "enum": ["turbos"] },
+        "maxSlippageBps": { "type": "integer", "minimum": 0, "maximum": 10000 }
+      },
+      "additionalProperties": true
+    },
+    "RebalanceBody": {
+      "type": "object",
+      "required": ["allocations"],
+      "properties": {
+        "allocations": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["formId", "targetBps"],
+            "properties": {
+              "formId": { "type": "string" },
+              "targetBps": { "type": "integer", "minimum": 0, "maximum": 10000 }
+            }
+          }
+        },
+        "ownerOnly": { "type": "boolean", "const": true }
+      },
+      "additionalProperties": true
+    },
+    "RescueBody": {
+      "type": "object",
+      "required": ["reason", "toOwner"],
+      "properties": {
+        "reason": { "type": "string" },
+        "toOwner": { "type": "string" },
+        "amountMicros": { "$ref": "#/$defs/micros" },
+        "bridgeTxId": { "type": "string" }
+      },
+      "additionalProperties": true
+    }
+  }
+}
