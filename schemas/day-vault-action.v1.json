@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-vault-action.v1.json",
+  "title": "day-vault-action.v1",
+  "description": "DAY cage action vocabulary (DAY-188 / developer guide §3.3). Only fund movements the cage permits. No transfer-to-arbitrary-address.",
+  "type": "object",
+  "required": ["schemaVersion", "kind"],
+  "properties": {
+    "schemaVersion": { "const": "day-vault-action.v1" },
+    "kind": {
+      "type": "string",
+      "enum": ["ROUTE", "EXIT", "REBALANCE", "HARVEST", "COMPOUND", "AUTOPAY"],
+      "description": "Mechanical action. Exactly these six; no TRANSFER or free-form send."
+    },
+    "venue": {
+      "type": ["string", "null"],
+      "description": "Target venue id for ROUTE / EXIT / HARVEST / COMPOUND"
+    },
+    "fromVenue": {
+      "type": ["string", "null"],
+      "description": "Source venue for REBALANCE"
+    },
+    "toVenue": {
+      "type": ["string", "null"],
+      "description": "Destination venue for REBALANCE"
+    },
+    "payee": {
+      "type": ["string", "null"],
+      "description": "Allowlisted payee label for AUTOPAY (never a free-form 0x address)"
+    },
+    "amountMicros": {
+      "type": ["string", "null"],
+      "pattern": "^\\d+$",
+      "description": "Non-negative integer micros as decimal string"
+    },
+    "grossYieldMicros": {
+      "type": ["string", "null"],
+      "pattern": "^\\d+$",
+      "description": "Realized gross yield for HARVEST (optional until claim)"
+    },
+    "destination": {
+      "type": ["string", "null"],
+      "description": "EXIT/COMPOUND residual must be owner wallet when set; arbitrary addresses rejected"
+    }
+  },
+  "additionalProperties": true
+}

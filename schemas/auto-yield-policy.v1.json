@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/auto-yield-policy.v1.json",
+  "title": "auto-yield-policy.v1",
+  "type": "object",
+  "required": ["schemaVersion", "characterId", "enabled"],
+  "properties": {
+    "schemaVersion": { "const": "auto-yield-policy.v1" },
+    "characterId": { "type": "string" },
+    "enabled": { "type": "boolean" },
+    "targetChain": { "enum": ["sui", "solana"] },
+    "targetVenue": { "type": "string" },
+    "allowedChains": { "type": "array", "items": { "type": "string" } },
+    "protocolYieldSkimBps": { "type": "integer", "const": 500 }
+  }
+}

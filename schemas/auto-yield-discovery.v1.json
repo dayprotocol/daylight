@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/auto-yield-discovery.v1.json",
+  "title": "auto-yield-discovery.v1",
+  "type": "object",
+  "required": ["schemaVersion", "status", "pools"],
+  "properties": {
+    "schemaVersion": { "const": "auto-yield-discovery.v1" },
+    "status": { "type": "string" },
+    "pools": { "type": "array" },
+    "blockers": { "type": "array", "items": { "type": "string" } }
+  }
+}

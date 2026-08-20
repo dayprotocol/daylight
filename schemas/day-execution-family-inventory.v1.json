@@ -1,0 +1,285 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-execution-family-inventory.v1.json",
+  "title": "day-execution-family-inventory.v1",
+  "description": "DAY-986 per-cell ExecutionFamily inventory. Classifies each dayop* into a money-path family and incompatibility residual. Never authorizes depositableLive promotion.",
+  "type": "object",
+  "required": ["schemaVersion", "cells", "families"],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "day-execution-family-inventory.v1"
+    },
+    "builtAt": {
+      "type": ["string", "null"],
+      "description": "ISO-8601 build time when known."
+    },
+    "source": {
+      "type": "string",
+      "description": "Provenance of input rows (fixture, recorded probe id). Not a live API claim."
+    },
+    "note": {
+      "type": "string"
+    },
+    "summary": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "cells": { "type": "integer", "minimum": 0 },
+        "families": { "type": "integer", "minimum": 0 },
+        "byHonesty": {
+          "type": "object",
+          "additionalProperties": { "type": "integer", "minimum": 0 }
+        },
+        "incompatibleSiblingChecks": { "type": "integer", "minimum": 0 },
+        "promotesDepositableLive": {
+          "const": false,
+          "description": "DAY-986 never promotes live."
+        }
+      }
+    },
+    "families": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/familyDescriptor" }
+    },
+    "cells": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/cell" }
+    },
+    "lookup": {
+      "$ref": "#/$defs/lookupTables",
+      "description": "Machine-readable dayopId / routeKey → ExecutionFamily mapping. promotesDepositableLive is always false."
+    }
+  },
+  "$defs": {
+    "instructionClass": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Deposit or exit instruction class (e.g. erc4626-deposit, mtoken-redeem, clmm-add-liquidity, unknown)."
+    },
+    "provenanceClass": {
+      "type": "string",
+      "minLength": 1
+    },
+    "custodyModel": {
+      "type": "string",
+      "enum": ["none", "peer", "managed", "unknown"]
+    },
+    "positionType": {
+      "type": "string",
+      "enum": [
+        "single-asset",
+        "lp-two-sided",
+        "clmm",
+        "perps",
+        "lst",
+        "pt-yt",
+        "managed",
+        "unknown"
+      ]
+    },
+    "honesty": {
+      "type": "string",
+      "enum": [
+        "dark",
+        "mapOnly",
+        "unsafeExcluded",
+        "residual",
+        "unassigned"
+      ],
+      "description": "Offline inventory-only classification. Measured production truth is not represented or promoted by this schema."
+    },
+    "routeApplicability": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "sameChainDeposit": { "type": "boolean" },
+        "sameChainExactOwnerExit": { "type": "boolean" },
+        "crossChainEligible": { "type": "boolean" }
+      }
+    },
+    "incompatibilityReason": {
+      "type": "string",
+      "enum": [
+        "chain_mismatch",
+        "adapter_mismatch",
+        "brand_only_match",
+        "deposit_instruction_class_mismatch",
+        "exit_instruction_class_mismatch",
+        "provenance_class_mismatch",
+        "custody_model_mismatch",
+        "position_type_mismatch",
+        "entry_asset_class_mismatch",
+        "market_kind_mismatch",
+        "map_only",
+        "unsafe_excluded",
+        "missing_adapter",
+        "builder_unavailable",
+        "no_roundtrip_proof",
+        "simulation_only_sibling",
+        "permissioned_or_rwa",
+        "route_not_applicable",
+        "unassigned_family"
+      ]
+    },
+    "familyDescriptor": {
+      "type": "object",
+      "required": [
+        "familyId",
+        "chain",
+        "adapterId",
+        "depositInstructionClass",
+        "exitInstructionClass",
+        "provenanceClass",
+        "promotesDepositableLive"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "familyId": { "type": "string", "minLength": 1 },
+        "chain": { "type": "string", "minLength": 1 },
+        "adapterId": { "type": "string", "minLength": 1 },
+        "protocol": { "type": ["string", "null"] },
+        "brand": { "type": ["string", "null"] },
+        "depositInstructionClass": { "$ref": "#/$defs/instructionClass" },
+        "exitInstructionClass": { "$ref": "#/$defs/instructionClass" },
+        "provenanceClass": { "$ref": "#/$defs/provenanceClass" },
+        "custodyModel": { "$ref": "#/$defs/custodyModel" },
+        "positionType": { "$ref": "#/$defs/positionType" },
+        "anchorDayopId": { "type": ["string", "null"] },
+        "compatibleDayopIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "residualDayopIds": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "promotesDepositableLive": {
+          "const": false
+        },
+        "notes": { "type": ["string", "null"] }
+      }
+    },
+    "cell": {
+      "type": "object",
+      "required": [
+        "dayopId",
+        "chain",
+        "familyId",
+        "honesty",
+        "residualCodes",
+        "promotesDepositableLive"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "dayopId": {
+          "type": "string",
+          "pattern": "^dayop[a-z0-9]+$"
+        },
+        "chain": { "type": "string", "minLength": 1 },
+        "protocol": { "type": ["string", "null"] },
+        "adapterId": { "type": ["string", "null"] },
+        "brand": { "type": ["string", "null"] },
+        "entryAsset": { "type": ["string", "null"] },
+        "entryAssetClass": { "type": ["string", "null"] },
+        "marketKind": { "type": ["string", "null"] },
+        "familyId": { "type": "string", "minLength": 1 },
+        "depositInstructionClass": { "$ref": "#/$defs/instructionClass" },
+        "exitInstructionClass": { "$ref": "#/$defs/instructionClass" },
+        "provenanceClass": { "$ref": "#/$defs/provenanceClass" },
+        "custodyModel": { "$ref": "#/$defs/custodyModel" },
+        "positionType": { "$ref": "#/$defs/positionType" },
+        "routeApplicability": { "$ref": "#/$defs/routeApplicability" },
+        "honesty": { "$ref": "#/$defs/honesty" },
+        "residualCodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/incompatibilityReason" }
+        },
+        "incompatibility": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "vsFamilyId": { "type": ["string", "null"] },
+            "reasons": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/incompatibilityReason" }
+            }
+          }
+        },
+        "catalogHints": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "mapOnly": { "type": ["boolean", "null"] },
+            "blockers": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "unsafeExcluded": { "type": ["boolean", "null"] }
+          }
+        },
+        "promotesDepositableLive": {
+          "const": false
+        }
+      }
+    },
+    "lookupDayopEntry": {
+      "type": "object",
+      "required": ["familyId", "promotesDepositableLive"],
+      "additionalProperties": false,
+      "properties": {
+        "familyId": { "type": "string", "minLength": 1 },
+        "routeKey": { "type": "string", "minLength": 1 },
+        "honesty": { "$ref": "#/$defs/honesty" },
+        "residualCodes": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/incompatibilityReason" }
+        },
+        "promotesDepositableLive": {
+          "const": false,
+          "description": "Inventory lookup never authorizes live deposit."
+        }
+      }
+    },
+    "lookupRouteEntry": {
+      "type": "object",
+      "required": ["familyId", "promotesDepositableLive"],
+      "additionalProperties": false,
+      "properties": {
+        "familyId": { "type": "string", "minLength": 1 },
+        "dayopIds": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^dayop[a-z0-9]+$" }
+        },
+        "honestyClasses": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/honesty" }
+        },
+        "promotesDepositableLive": {
+          "const": false
+        }
+      }
+    },
+    "lookupTables": {
+      "type": "object",
+      "required": ["byDayopId", "byRouteKey", "promotesDepositableLive"],
+      "additionalProperties": false,
+      "properties": {
+        "byDayopId": {
+          "type": "object",
+          "description": "dayop* id → ExecutionFamily mapping entry.",
+          "additionalProperties": { "$ref": "#/$defs/lookupDayopEntry" }
+        },
+        "byRouteKey": {
+          "type": "object",
+          "description": "routeKey (chain:adapter:entryAsset) → family mapping entry.",
+          "additionalProperties": { "$ref": "#/$defs/lookupRouteEntry" }
+        },
+        "promotesDepositableLive": {
+          "const": false,
+          "description": "DAY-986 inventory does not promote depositableLive."
+        }
+      }
+    }
+  }
+}

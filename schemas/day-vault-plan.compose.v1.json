@@ -1,0 +1,38 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://dayprotocol.com/schemas/day-vault-plan.v1.json",
+  "title": "day-vault-plan.v1",
+  "description": "DAY composed vault plan (StateRequest-style). Copyright Limitless Labs.",
+  "type": "object",
+  "required": ["schemaVersion", "kind", "status", "blockers", "steps", "submitted"],
+  "properties": {
+    "schemaVersion": { "const": "day-vault-plan.v1" },
+    "kind": {
+      "type": ["string", "null"],
+      "enum": [
+        "deposit",
+        "withdraw",
+        "deploy",
+        "undeploy",
+        "harvest",
+        "bridge_in",
+        "swap",
+        "rebalance",
+        "rescue",
+        null
+      ]
+    },
+    "goal": { "type": ["string", "null"] },
+    "status": { "type": "string", "enum": ["prepared", "blocked", "ready_to_submit"] },
+    "blockers": { "type": "array", "items": { "type": "string" } },
+    "steps": { "type": "array" },
+    "submitted": { "const": false },
+    "executionEnabled": { "type": "boolean" },
+    "vaultId": { "type": ["string", "null"] },
+    "ownerAddress": { "type": ["string", "null"] },
+    "formId": { "type": ["string", "null"] },
+    "strategyEnabled": { "type": "boolean" },
+    "notes": { "type": "array", "items": { "type": "string" } }
+  },
+  "additionalProperties": true
+}

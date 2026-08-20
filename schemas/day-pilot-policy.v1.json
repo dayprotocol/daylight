@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://day.dev/schemas/day-pilot-policy.v1.json",
+  "title": "day-pilot-policy.v1",
+  "type": "object",
+  "required": ["schemaVersion", "walletAddress", "chain", "enabled", "venueAllowlist", "payeeAllowlist"],
+  "properties": {
+    "schemaVersion": { "const": "day-pilot-policy.v1" },
+    "walletAddress": { "type": "string" },
+    "chain": { "type": "string", "enum": ["sui", "solana"] },
+    "enabled": { "type": "boolean" },
+    "venueAllowlist": { "type": "array", "items": { "type": "string" } },
+    "payeeAllowlist": { "type": "array", "items": { "type": "string" } },
+    "goal": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["stable_yield", "max_yield", "balanced", "preserve_capital"]
+        },
+        "note": { "type": ["string", "null"] },
+        "minNetApyBps": { "type": ["integer", "null"] },
+        "rebalanceMinDeltaBps": { "type": "integer" }
+      }
+    },
+    "protocolYieldSkimBps": { "type": "integer", "minimum": 0, "maximum": 1000 },
+    "ownerDestinationLock": { "const": true },
+    "agentMayWithdrawPrincipal": { "const": false },
+    "withinChainOnly": { "const": true }
+  }
+}
